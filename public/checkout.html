@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Buy cool new product</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        #checkout-form {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-top: 20px;
+        }
+
+        #email {
+          width: 100%;
+          max-width: 300px;
+          padding: 10px;
+          border: 2px solid #ccc;
+          border-radius: 5px;
+          font-size: 16px;
+          margin-bottom: 10px;
+        }
+
+        #email:focus {
+          border-color: #6772e5;
+          outline: none;
+        }
+
+        #checkout-button {
+          background-color: #6772e5;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 5px;
+          font-size: 16px;
+          cursor: pointer;
+          transition: background 0.3s ease;
+        }
+
+        #checkout-button:hover {
+          background-color: #5469d4;
+        }
+    </style>
+  </head>
+  <body>
+    <section>
+      <div class="product">
+        <img src="https://i.imgur.com/EHyR2nP.png" alt="The cover of Stubborn Attachments" />
+        <div class="description">
+          <h3>Stubborn Attachments</h3>
+          <h5>$20.00</h5>
+        </div>
+      </div>
+
+      <form id="checkout-form">
+        <input type="email" id="email" name="email" placeholder="Enter your email" required />
+        <button type="submit" id="checkout-button">Checkout</button>
+      </form>
+
+      <script>
+        document.getElementById("checkout-form").addEventListener("submit", async function(event) {
+          event.preventDefault();
+          const email = document.getElementById("email").value;
+
+          try {
+            const response = await fetch("/create-checkout-session", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: email })
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to create checkout session");
+            }
+
+            const session = await response.json();
+            const stripe = Stripe("pk_test_51Qx2E1GH9aDXudBCITbQQNZZK7ieFdc4nFW2RveaN7CJnGJJHDyU63uE8jcx1BN4qrWYbZz7uEPPm0vKKVruwBvf000wp8JAVt"); // Replace with your publishable key
+            stripe.redirectToCheckout({ sessionId: session.id });
+          } catch (error) {
+            console.error("Checkout Error:", error);
+          }
+        });
+      </script>
+    </section>
+  </body>
+</html>
